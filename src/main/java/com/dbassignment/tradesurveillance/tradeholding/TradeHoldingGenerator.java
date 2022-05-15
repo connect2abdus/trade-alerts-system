@@ -6,14 +6,20 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
+
+import com.dbassignment.tradesurveillance.model.HoldingFiles;
+import com.dbassignment.tradesurveillance.repository.HoldingFilesRepository;
 
 /**
  * 
@@ -25,6 +31,9 @@ import org.springframework.stereotype.Component;
 public class TradeHoldingGenerator implements ApplicationRunner{
 	
 	//public static void main(String[] args) {}
+	
+	@Autowired
+	HoldingFilesRepository holdingFilesRepository;
 
 public static String getCurrentLocalDateTimeStamp() {
     return LocalDateTime.now()
@@ -64,11 +73,15 @@ timer.schedule(new TimerTask() {
             }
         } catch(IOException e){
         	e.printStackTrace();
+        	String errorMessage = e.getMessage();
+        	saveHoldingFileDetails(dest,errorMessage);
         }
         finally {
             try {
 				is.close();
 				 os.close();
+				 saveHoldingFileDetails(dest,"");
+				 
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -83,6 +96,27 @@ timer.schedule(new TimerTask() {
 	System.out.println(getCurrentLocalDateTimeStamp());	
 
     
+		
+	}
+	
+	//@PutMapping("/tutorials/{id}")
+	public void saveHoldingFileDetails(File holdingFile, String errorMessage) {
+		
+		HoldingFiles holdingFiles = new HoldingFiles();
+		
+		holdingFiles.setFilename(holdingFile.getName());
+		
+		Timestamp instant= Timestamp.from(Instant.now());  
+		holdingFiles.setFileCreationTimestamp(instant);
+		
+		holdingFiles.setFilelocation(holdingFile.getAbsolutePath());
+		
+		holdingFiles.setErrorlog(errorMessage);
+		
+		holdingFilesRepository.save(holdingFiles);
+		
+		System.out.println( "---------- "+ holdingFile.getName() + " holding file got generated from trading system ------------");
+		
 		
 	}
 }
