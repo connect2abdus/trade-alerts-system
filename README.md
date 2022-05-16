@@ -88,4 +88,7 @@ Once these transactios pass through the end to end process flow. we will see two
 6. Report the Alert by calling the Regulatory API call. 
 7. Submit an receive the alert from the ActiveMQ queue.
 8. If Regulatory API call fails because of connectivity error , retry for 5 time in each 5 sec and log the error if still failing.
- 
+
+### To be completed items
+1.Writing Unit testcases
+2.Retry mechanism for the API calls
