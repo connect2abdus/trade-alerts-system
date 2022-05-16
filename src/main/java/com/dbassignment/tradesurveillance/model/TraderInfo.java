@@ -1,5 +1,6 @@
 package com.dbassignment.tradesurveillance.model;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 
 import javax.persistence.Column;
@@ -11,7 +12,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "traderinfo")
-public class TraderInfo {
+public class TraderInfo implements Serializable {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
