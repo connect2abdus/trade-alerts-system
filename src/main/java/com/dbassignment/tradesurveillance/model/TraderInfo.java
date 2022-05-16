@@ -40,7 +40,7 @@ public class TraderInfo {
 	private String stockId;
 
 	@Column(name = "reportingtime")
-	private Timestamp reportingtime;
+	private String reportingtime;
 
 	/**
 	 * @return the firstName
@@ -143,14 +143,14 @@ public class TraderInfo {
 	/**
 	 * @return the reportingtime
 	 */
-	public Timestamp getReportingtime() {
+	public String getReportingtime() {
 		return reportingtime;
 	}
 
 	/**
 	 * @param reportingtime the reportingtime to set
 	 */
-	public void setReportingtime(Timestamp reportingtime) {
+	public void setReportingtime(String reportingtime) {
 		this.reportingtime = reportingtime;
 	}
 
@@ -165,7 +165,7 @@ public class TraderInfo {
 	 * @param reportingtime
 	 */
 	public TraderInfo(String firstName, String lastName, String nationality, String countryOfResidence,
-			String dateOfBirth, String traderId, String stockId, Timestamp reportingtime) {
+			String dateOfBirth, String traderId, String stockId, String reportingtime) {
 		super();
 		this.firstName = firstName;
 		this.lastName = lastName;
@@ -175,6 +175,14 @@ public class TraderInfo {
 		this.traderId = traderId;
 		this.stockId = stockId;
 		this.reportingtime = reportingtime;
+	}
+
+	/**
+	 * 
+	 */
+	public TraderInfo() {
+		super();
+		// TODO Auto-generated constructor stub
 	}
 
 	/* (non-Javadoc)

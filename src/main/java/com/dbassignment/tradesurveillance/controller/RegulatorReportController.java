@@ -1,24 +1,30 @@
 package com.dbassignment.tradesurveillance.controller;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.dbassignment.tradesurveillance.model.TraderInfo;
 
 @CrossOrigin(origins = "http://localhost:8090")
 @RestController
 @RequestMapping("/api/regulator")
 public class RegulatorReportController {
 	
-	/*
-	@PostMapping("/v1/tutorials")
-	public ResponseEntity<Tutorial> createTutorial(@RequestBody Tutorial tutorial) {
+	//http://localhost:8090/api/regulator/v1/report-suspecious-trader
+	@PostMapping(value = "/v1/report-suspecious-trader", consumes = "application/json")
+	public ResponseEntity reportSuspeciousTrader(@RequestBody TraderInfo traderInfo) {
 		try {
-			Tutorial _tutorial = tutorialRepository
-					.save(new Tutorial(tutorial.getTitle(), tutorial.getDescription(), false));
-			return new ResponseEntity<>(_tutorial, HttpStatus.CREATED);
+			System.out.println("-----------In Rest output " + traderInfo.toString());
+			
+			return ResponseEntity.ok(HttpStatus.OK);
 		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+			return  (ResponseEntity) ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT);
 		}
-	}*/
+	}
 
 }

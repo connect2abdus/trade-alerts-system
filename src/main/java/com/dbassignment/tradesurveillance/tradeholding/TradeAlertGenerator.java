@@ -12,7 +12,11 @@ import java.util.TimerTask;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import com.dbassignment.tradesurveillance.model.TradeAlert;
 import com.dbassignment.tradesurveillance.model.TraderInfo;
@@ -34,6 +38,9 @@ public class TradeAlertGenerator implements ApplicationRunner {
 	@Autowired
 	TraderInfoRepository traderInfoRepository;
 
+	@Autowired
+	RestTemplate restTemplate;
+	
 	public static String getCurrentLocalDateTimeStamp() {
 		return LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss.SSS"));
 	}
@@ -61,10 +68,11 @@ public class TradeAlertGenerator implements ApplicationRunner {
 					List<TraderInfo> flaggedTradersList = new ArrayList<>();
 					for (TradeAlert alert : alerts) {
 						// System.out.println(i + " alert " + alert.toString());
-						// Timestamp instant= Timestamp.from(Instant.now());
+						 //Timestamp instant= Timestamp.from(Instant.now());
+						
 						TraderInfo traderInfo = new TraderInfo(alert.getFirstName(), alert.getLastName(),
 								alert.getNationality(), alert.getCountryOfResidence(), alert.getDateOfBirth(),
-								alert.getTraderId(), alert.getStockId(), Timestamp.from(Instant.now()));
+								alert.getTraderId(), alert.getStockId(), Timestamp.from(Instant.now()).toString());
 						flaggedTradersList.add(traderInfo);
 					}
 
@@ -75,6 +83,32 @@ public class TradeAlertGenerator implements ApplicationRunner {
 						holdingTransactionsRepository.updateIsScanned(true, traderInfo.getTraderId(),
 								traderInfo.getStockId());
 						// Call the rest Regulatory API an report; 
+						
+						 String firstName = traderInfo.getFirstName();							
+							 String lastName=traderInfo.getLastName(); 							
+							 String nationality=traderInfo.getNationality();					
+							 String countryOfResidence=traderInfo.getCountryOfResidence();							
+							 String dateOfBirth=traderInfo.getDateOfBirth();					
+							 String traderId=traderInfo.getTraderId();							
+							 String stockId=traderInfo.getStockId();							
+							 String reportingtime=traderInfo.getReportingtime();
+
+						
+						String url = "http://localhost:8090/api/regulator/v1/report-suspecious-trader";
+						//String requestJson = "{\"queriedQuestion\":\"Is there pain in your hand?\"}";
+						
+						String	requestJson= 	"{\"firstName\":\"" +firstName + "\",\"lastName\":\"" +lastName + "\",\"nationality\":\""+nationality+ 
+								"\",\"countryOfResidence\":\"" +countryOfResidence+ "\",\"dateOfBirth\":\""+dateOfBirth+"\",\"traderId\":\"" +traderId+ "\",\"stockId\":\""+stockId+ "\",\"reportingtime\":\"" +
+								reportingtime + "\"}";	
+						
+						System.out.println("----------requestJson: " + requestJson);
+						
+						HttpHeaders headers = new HttpHeaders();
+						headers.setContentType(MediaType.APPLICATION_JSON);
+
+						HttpEntity<String> entity = new HttpEntity<String>(requestJson,headers);
+						String answer = restTemplate.postForObject(url, entity, String.class);
+						System.out.println(answer);
 
 					}
 
@@ -87,5 +121,7 @@ public class TradeAlertGenerator implements ApplicationRunner {
 		System.out.println(getCurrentLocalDateTimeStamp());
 
 	}
+	
+	
 
 }
