@@ -61,6 +61,7 @@ Monitor the console log to see the see the end to end flow.
 We are using the  trade-alerts-system\tradeholding.txt file which is having two ba data for traders who's activity is reported as a suspecious activity.
 
 ```
+First_name;Last_Name;Nationality;Country_of_Residence;date_of_birth;unique_Trader_id;Amount;currency;unique_Stock_ID;Buy_or_Sell;Trade_Execution_Date_Time
 Maya;Amin;US;US;01011980;US001;10000;USD;US011;BUY;2022-05-16 09:25:24.741
 Maya;Amin;US;US;01011980;US001;500;USD;US011;BUY;2022-05-16 09:29:10.700
 Maya;Amin;US;US;01011980;US001;2500.50;USD;US011;SELL;2022-05-16 09:30:24.741
