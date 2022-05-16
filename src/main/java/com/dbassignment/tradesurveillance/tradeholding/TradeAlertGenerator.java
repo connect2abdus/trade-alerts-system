@@ -16,10 +16,16 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import com.dbassignment.tradesurveillance.exception.RemoteServiceNotAvailableException;
 import com.dbassignment.tradesurveillance.model.TradeAlert;
 import com.dbassignment.tradesurveillance.model.TraderInfo;
 import com.dbassignment.tradesurveillance.repository.HoldingTransactionsRepository;
@@ -33,9 +39,9 @@ import com.dbassignment.tradesurveillance.repository.TraderInfoRepository;
  */
 @Component
 public class TradeAlertGenerator implements ApplicationRunner {
-	
+
+	private static String REGULATOR_URL = "http://localhost:8090/api/regulator/v1/report-suspecious-trader";
 	private static Logger log = LoggerFactory.getLogger(TradeAlertGenerator.class);
-	
 
 	@Autowired
 	HoldingTransactionsRepository holdingTransactionsRepository;
@@ -45,7 +51,10 @@ public class TradeAlertGenerator implements ApplicationRunner {
 
 	@Autowired
 	RestTemplate restTemplate;
-	
+
+	@Autowired
+	RetryTemplate retryTemplate;
+
 	public static String getCurrentLocalDateTimeStamp() {
 		return LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss.SSS"));
 	}
@@ -62,18 +71,20 @@ public class TradeAlertGenerator implements ApplicationRunner {
 			String businessDate = "2022-05-16";
 			int i = 0;
 
+			@Retryable(value = {
+					RemoteServiceNotAvailableException.class }, maxAttempts = 3, backoff = @Backoff(delay = 1000))
 			@Override
 			public void run() {
 
 				List<TradeAlert> alerts = holdingTransactionsRepository.getAlerts();
 
 				if (alerts != null && alerts.size() > 0) {
-					//int i = 1;
+					// int i = 1;
 					List<TraderInfo> flaggedTradersList = new ArrayList<>();
 					for (TradeAlert alert : alerts) {
 						// System.out.println(i + " alert " + alert.toString());
-						 //Timestamp instant= Timestamp.from(Instant.now());
-						
+						// Timestamp instant= Timestamp.from(Instant.now());
+
 						TraderInfo traderInfo = new TraderInfo(alert.getFirstName(), alert.getLastName(),
 								alert.getNationality(), alert.getCountryOfResidence(), alert.getDateOfBirth(),
 								alert.getTraderId(), alert.getStockId(), Timestamp.from(Instant.now()).toString());
@@ -82,38 +93,50 @@ public class TradeAlertGenerator implements ApplicationRunner {
 
 					if (flaggedTradersList.size() > 0)
 						traderInfoRepository.saveAll(flaggedTradersList); // save traders.
-					//update scanned status
+					// update scanned status
 					for (TraderInfo traderInfo : flaggedTradersList) {
 						holdingTransactionsRepository.updateIsScanned(true, traderInfo.getTraderId(),
 								traderInfo.getStockId());
-						// Call the rest Regulatory API an report; 
-						
-						 String firstName = traderInfo.getFirstName();							
-							 String lastName=traderInfo.getLastName(); 							
-							 String nationality=traderInfo.getNationality();					
-							 String countryOfResidence=traderInfo.getCountryOfResidence();							
-							 String dateOfBirth=traderInfo.getDateOfBirth();					
-							 String traderId=traderInfo.getTraderId();							
-							 String stockId=traderInfo.getStockId();							
-							 String reportingtime=traderInfo.getReportingtime();
+						// Call the rest Regulatory API an report;
 
-						
-						String url = "http://localhost:8090/api/regulator/v1/report-suspecious-trader";
-												
-						String	requestJson= 	"{\"firstName\":\"" +firstName + "\",\"lastName\":\"" +lastName + "\",\"nationality\":\""+nationality+ 
-								"\",\"countryOfResidence\":\"" +countryOfResidence+ "\",\"dateOfBirth\":\""+dateOfBirth+"\",\"traderId\":\"" +traderId+ "\",\"stockId\":\""+stockId+ "\",\"reportingtime\":\"" +
-								reportingtime + "\"}";	
-						
-						
-						log.info("--------In TradeAlertGenerator: Alert!! < "+requestJson+ ">");
-						
+						String firstName = traderInfo.getFirstName();
+						String lastName = traderInfo.getLastName();
+						String nationality = traderInfo.getNationality();
+						String countryOfResidence = traderInfo.getCountryOfResidence();
+						String dateOfBirth = traderInfo.getDateOfBirth();
+						String traderId = traderInfo.getTraderId();
+						String stockId = traderInfo.getStockId();
+						String reportingtime = traderInfo.getReportingtime();
+
+						String requestJson = "{\"firstName\":\"" + firstName + "\",\"lastName\":\"" + lastName
+								+ "\",\"nationality\":\"" + nationality + "\",\"countryOfResidence\":\""
+								+ countryOfResidence + "\",\"dateOfBirth\":\"" + dateOfBirth + "\",\"traderId\":\""
+								+ traderId + "\",\"stockId\":\"" + stockId + "\",\"reportingtime\":\"" + reportingtime
+								+ "\"}";
+
+						log.info("--------In TradeAlertGenerator: Alert!! < " + requestJson + ">");
+
 						HttpHeaders headers = new HttpHeaders();
 						headers.setContentType(MediaType.APPLICATION_JSON);
 
-						HttpEntity<String> entity = new HttpEntity<String>(requestJson,headers);
-						String httpResponse = restTemplate.postForObject(url, entity, String.class);
-						log.info("--------In TradeAlertGenerator: Alert submitted to Regulator with status !! < "+httpResponse+ ">");
+						HttpEntity<String> entity = new HttpEntity<String>(requestJson, headers);
+						// String httpResponse = restTemplate.postForObject(REGULATOR_URL, entity,String.class);
+						
+						
+						 ResponseEntity<String> responseEntity = retryTemplate.execute(context -> restTemplate.exchange(REGULATOR_URL, HttpMethod.POST, entity,String.class));
 
+						 log.info("--------In TradeAlertGenerator: Alert submitted to Regulator with status !! < "
+									+ responseEntity.toString() + ">");
+						 
+						/*retryTemplate.execute(context -> {
+							System.out.println("inside retry method");
+							String httpRespons = restTemplate.postForObject(REGULATOR_URL, entity, String.class);
+							log.info("--------In TradeAlertGenerator: Alert submitted to Regulator with status !! < "
+									+ httpRespons + ">");
+								throw new IllegalStateException("Something went wrong");
+						});*/
+						
+						
 					}
 
 				}
@@ -122,10 +145,7 @@ public class TradeAlertGenerator implements ApplicationRunner {
 		}, 0, 20 * 1000);
 
 		// 2m = 2*60*1000 ms
-		
 
 	}
-	
-	
 
 }
