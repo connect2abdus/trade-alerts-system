@@ -23,7 +23,7 @@ public class MessageConsumer {
     public void receiveMessage(@Payload TraderInfo traderInfo,
                                @Headers MessageHeaders headers,
                                Message message, Session session) {
-        log.info("received message <" + traderInfo + ">");
+        log.info("---***** In MessageConsumer: Received reported TraderInfo message From  <" + traderInfo + ">");
 
         log.info("- - - - - - - - - - - - - - - - - - - - - - - -");
         log.info("######          Message Details           #####");

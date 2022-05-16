@@ -3,6 +3,11 @@ package com.dbassignment.tradesurveillance.model;
 import java.sql.Timestamp;
 
 import javax.persistence.*;
+/**
+ * 
+ * @author Abdus Mondal
+ *
+ */
 
 @Entity
 @Table(name = "holdingfiles")

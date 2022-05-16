@@ -18,7 +18,7 @@ public class MessageSender {
     private JmsTemplate jmsTemplate;
 
     public void send(TraderInfo treaderInfo) {
-        log.info("sending with convertAndSend() to queue <" + treaderInfo + ">");
+        log.info("In MessageSender: Sending TraderInfo with convertAndSend() to queue <" + treaderInfo + ">");
         jmsTemplate.convertAndSend(REGULATOR_REPORT_QUEUE, treaderInfo);
     }
 }

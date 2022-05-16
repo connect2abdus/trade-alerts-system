@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -31,6 +33,9 @@ import com.dbassignment.tradesurveillance.repository.TraderInfoRepository;
  */
 @Component
 public class TradeAlertGenerator implements ApplicationRunner {
+	
+	private static Logger log = LoggerFactory.getLogger(TradeAlertGenerator.class);
+	
 
 	@Autowired
 	HoldingTransactionsRepository holdingTransactionsRepository;
@@ -49,8 +54,7 @@ public class TradeAlertGenerator implements ApplicationRunner {
 	public void run(ApplicationArguments args) throws Exception {
 		// TODO Auto-generated method stub
 
-		System.out
-				.println("--------------------------Started after Spring boot application -------------------------!");
+		log.info("--------In TradeAlertGenerator: Generating the alerts in each 10 min ----------");
 
 		Timer timer = new Timer();
 		timer.schedule(new TimerTask() {
@@ -95,20 +99,20 @@ public class TradeAlertGenerator implements ApplicationRunner {
 
 						
 						String url = "http://localhost:8090/api/regulator/v1/report-suspecious-trader";
-						//String requestJson = "{\"queriedQuestion\":\"Is there pain in your hand?\"}";
-						
+												
 						String	requestJson= 	"{\"firstName\":\"" +firstName + "\",\"lastName\":\"" +lastName + "\",\"nationality\":\""+nationality+ 
 								"\",\"countryOfResidence\":\"" +countryOfResidence+ "\",\"dateOfBirth\":\""+dateOfBirth+"\",\"traderId\":\"" +traderId+ "\",\"stockId\":\""+stockId+ "\",\"reportingtime\":\"" +
 								reportingtime + "\"}";	
 						
-						System.out.println("----------requestJson: " + requestJson);
+						
+						log.info("--------In TradeAlertGenerator: Alert!! < "+requestJson+ ">");
 						
 						HttpHeaders headers = new HttpHeaders();
 						headers.setContentType(MediaType.APPLICATION_JSON);
 
 						HttpEntity<String> entity = new HttpEntity<String>(requestJson,headers);
-						String answer = restTemplate.postForObject(url, entity, String.class);
-						System.out.println(answer);
+						String httpResponse = restTemplate.postForObject(url, entity, String.class);
+						log.info("--------In TradeAlertGenerator: Alert submitted to Regulator with status !! < "+httpResponse+ ">");
 
 					}
 
@@ -118,7 +122,7 @@ public class TradeAlertGenerator implements ApplicationRunner {
 		}, 0, 20 * 1000);
 
 		// 2m = 2*60*1000 ms
-		System.out.println(getCurrentLocalDateTimeStamp());
+		
 
 	}
 	
