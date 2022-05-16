@@ -78,3 +78,14 @@ Maya1;Amin;US;US;01011980;US002;150;USD;US0021;BUY;2022-05-16 16:42:21.741
 
 ```
 Once these transactios pass through the end to end process flow. we will see two Alerts received by the Regulator Queue.
+
+### Test case scenarios 
+1. Test case to check if we are receiving the holding file in each 2 min.
+2. Receiving the holding file has 200 records.
+3. Receiving the holding file has all the required field as per the specification and order mentioned.
+4. Validate the positive scenatio to generate the alert.
+5. Validate the negative scenatio to generate the alert. Alert does not generate in this case.
+6. Report the Alert by calling the Regulatory API call. 
+7. Submit an receive the alert from the ActiveMQ queue.
+8. If Regulatory API call fails because of connectivity error , retry for 5 time in each 5 sec and log the error if still failing.
+ 
