@@ -36,6 +36,8 @@ public class HoldingTransactions {
 public class TraderInfo implements Serializable {
 
 ```
+To access in-memory H2 database , when are application is up and running we can log on to the http://localhost:8090/h2-console with password as password and see the tables and content.
+
 ### Running the application in the local desktop/laptop
 ```
 $git clone https://github.com/connect2abdus/trade-alerts-system.git
@@ -55,4 +57,23 @@ Run the TradeAlertsSystemApplication.java as standard Java Application.
 Monitor the console log to see the see the end to end flow.
 
 ```
+### Testing the flow 
+We are using the  trade-alerts-system\tradeholding.txt file which is having two ba data for traders who's activity is reported as a suspecious activity.
 
+```
+Maya;Amin;US;US;01011980;US001;10000;USD;US011;BUY;2022-05-16 09:25:24.741
+Maya;Amin;US;US;01011980;US001;500;USD;US011;BUY;2022-05-16 09:29:10.700
+Maya;Amin;US;US;01011980;US001;2500.50;USD;US011;SELL;2022-05-16 09:30:24.741
+Maya;Amin;US;US;01011980;US001;1500.50;USD;US011;SELL;2022-05-16 09:32:24.741
+Maya;Amin;US;US;01011980;US001;150;USD;US011;BUY;2022-05-16 09:32:20.741
+Maya;Amin;US;US;01011980;US001;150;USD;US011;BUY;2022-05-16 09:32:21.741
+
+Maya1;Amin;US;US;01011980;US002;10000;USD;US0021;BUY;2022-05-16 09:25:24.741
+Maya1;Amin;US;US;01011980;US002;500;USD;US0021;BUY;2022-05-16 09:29:10.700
+Maya1;Amin;US;US;01011980;US002;2500.50;USD;US0021;SELL;2022-05-16 09:30:24.741
+Maya1;Amin;US;US;01011980;US002;1500.50;USD;US0021;SELL;2022-05-16 11:32:24.741
+Maya1;Amin;US;US;01011980;US002;150;USD;US0021;BUY;2022-05-16 12:42:20.741
+Maya1;Amin;US;US;01011980;US002;150;USD;US0021;BUY;2022-05-16 16:42:21.741
+
+```
+Once these transactios pass through the end to end process flow. we will see two Alerts received by the Regulator Queue.
